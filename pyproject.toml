@@ -42,6 +42,7 @@ dflash = "dflash.cli:main"
 Homepage = "https://github.com/Frankstuff/Speculative-decoding-project"
 Repository = "https://github.com/Frankstuff/Speculative-decoding-project"
 Issues = "https://github.com/Frankstuff/Speculative-decoding-project/issues"
+Upstream = "https://github.com/z-lab/dflash"
 Blog = "https://inco.ai/blog/dflash2/"
 Models = "https://huggingface.co/collections/z-lab/dflash-2"
 
