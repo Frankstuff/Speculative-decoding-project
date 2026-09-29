@@ -7,3 +7,6 @@ cache/
 .ruff_cache/
 build/
 dist/
+.pytest_cache/
+outputs/
+.context/

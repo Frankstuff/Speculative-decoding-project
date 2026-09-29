@@ -1,6 +1,6 @@
 import time
 from types import SimpleNamespace
-from typing import ClassVar
+from typing import Callable, ClassVar
 
 import torch
 from torch import nn
@@ -188,8 +188,21 @@ def dflash_generate(
     top_k: int = 0,
     block_size: int | None = None,
     return_stats: bool = False,
+    draft_observer: Callable[..., None] | None = None,
 ):
+    """Generate with DFlash, optionally observing paired research candidates.
+
+    The observer runs before verification on clones of the accepted prefix and
+    proposed block. It does not select output tokens or alter the live caches.
+    Observation adds substantial work: statistics collected with an observer
+    must not be interpreted as ordinary DFlash performance measurements.
+    """
     _validate_sampling(temperature, top_p, top_k)
+    if draft_observer is not None:
+        if temperature != 0:
+            raise ValueError("Draft observation currently supports greedy decoding only.")
+        if isinstance(model, DFlash2DraftModel):
+            raise ValueError("Draft observation currently supports original DFlash only.")
     num_input_tokens = input_ids.shape[1]
     max_length = num_input_tokens + max_new_tokens
     block_size = model.block_size if block_size is None else block_size
@@ -266,6 +279,18 @@ def dflash_generate(
                     draft_indices = None
                 else:
                     block_output_ids[:, 1:] = torch.argmax(draft_logits, dim=-1)
+
+        # we start the work here: DFlash has tokens; Qwen has not verified them.
+        # Column 0 is the target's anchor; column 1 is the first draft token.
+        # The experiment observer compares an independently redrafted suffix
+        # with the original, while this generator keeps its original rollout.
+        if draft_observer is not None and verify_size > 2:
+            draft_observer(
+                model=model,
+                target=target,
+                prefix_ids=output_ids[:, :start].clone(),
+                original_block=block_output_ids.clone(),
+            )
         output = target(
             block_output_ids,
             position_ids=block_position_ids,
