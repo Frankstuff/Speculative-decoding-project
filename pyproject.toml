@@ -39,9 +39,9 @@ dependencies = [
 dflash = "dflash.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/z-lab/dflash"
-Repository = "https://github.com/z-lab/dflash"
-Issues = "https://github.com/z-lab/dflash/issues"
+Homepage = "https://github.com/Frankstuff/Speculative-decoding-project"
+Repository = "https://github.com/Frankstuff/Speculative-decoding-project"
+Issues = "https://github.com/Frankstuff/Speculative-decoding-project/issues"
 Blog = "https://inco.ai/blog/dflash2/"
 Models = "https://huggingface.co/collections/z-lab/dflash-2"
 

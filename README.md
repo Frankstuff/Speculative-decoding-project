@@ -1,10 +1,10 @@
 # Conditional redrafting experiments with DFlash + Qwen3
 
-This research fork asks: **does showing a diffusion drafter its first proposed token help it predict the remaining tokens more accurately against Qwen?** It provides an executable first experiment using the frozen `Qwen/Qwen3-4B` target and frozen `z-lab/Qwen3-4B-DFlash-b16` drafter.
+This research project asks: **does showing a diffusion drafter its first proposed token help it predict the remaining tokens more accurately against Qwen?** It provides an executable first experiment using the frozen `Qwen/Qwen3-4B` target and frozen `z-lab/Qwen3-4B-DFlash-b16` drafter.
 
-Fork: [Frankstuff/dflash](https://github.com/Frankstuff/dflash), branch [`qwen-draft-model-changes`](https://github.com/Frankstuff/dflash/tree/qwen-draft-model-changes). The original project documentation is preserved in [docs/UPSTREAM_README.md](docs/UPSTREAM_README.md); the upstream [MIT license](LICENSE) is retained.
+Project: [Frankstuff/Speculative-decoding-project](https://github.com/Frankstuff/Speculative-decoding-project), branch [`qwen-draft-model-changes`](https://github.com/Frankstuff/Speculative-decoding-project/tree/qwen-draft-model-changes). The original project documentation is preserved in [docs/UPSTREAM_README.md](docs/UPSTREAM_README.md); the upstream [MIT license](LICENSE) is retained.
 
-The implemented treatment is **full conditional recomputation**: run the existing drafter a second time with one more visible token. There is no trained refinement module yet. This experiment establishes a baseline for the later proposal: an adapter and two transformer layers that reuse saved draft representations. No Qwen3-4B acceptance results or generation speedups have been measured for this fork yet.
+The implemented treatment is **full conditional recomputation**: run the existing drafter a second time with one more visible token. There is no trained refinement module yet. This experiment establishes a baseline for the later proposal: an adapter and two transformer layers that reuse saved draft representations. No Qwen3-4B acceptance results or generation speedups have been measured for this project yet.
 
 ## What changed and why
 
@@ -55,17 +55,17 @@ accepted prefix → a → x1 ─┬─ x2 → x3 → ...  original
 
 An efficient tree verifier would pack those paths into one target call. Its attention mask must let each token see its ancestors while preventing it from seeing the sibling branch; its positions and retained cache states must follow the selected path.
 
-This fork evaluates those two paths with independent target calls and runs a **third independent verification for the recomputation control**. Each verification recomputes the full prefix and uses no shared mutable cache. The reported best-of-two result includes only the original and conditional candidates; the control supports interpretation of their difference. This provides an isolated comparison before implementing a packed tree and its cache handling. It does not implement an efficient tree verifier or choose a winning branch for generation. Concatenating branches under an ordinary causal mask would be incorrect because later branches could read earlier ones.
+This experiment evaluates those two paths with independent target calls and runs a **third independent verification for the recomputation control**. Each verification recomputes the full prefix and uses no shared mutable cache. The reported best-of-two result includes only the original and conditional candidates; the control supports interpretation of their difference. This provides an isolated comparison before implementing a packed tree and its cache handling. It does not implement an efficient tree verifier or choose a winning branch for generation. Concatenating branches under an ordinary causal mask would be incorrect because later branches could read earlier ones.
 
 If Qwen rejects `x1`, all three candidates accept zero draft tokens: changing the suffix cannot repair their shared first mistake.
 
 ## Install and run
 
-Use Linux with an NVIDIA GPU for the real experiment; the initial research setup is a single A100. This new runner uses PyTorch/Transformers, independently of upstream's separate MLX backend. The CPU unit tests use tiny models and do not need the Qwen weights. Installing the fork does not download model weights; the first model run downloads them from Hugging Face.
+Use Linux with an NVIDIA GPU for the real experiment; the initial research setup is a single A100. This new runner uses PyTorch/Transformers, independently of upstream's separate MLX backend. The CPU unit tests use tiny models and do not need the Qwen weights. Installing the project does not download model weights; the first model run downloads them from Hugging Face.
 
 ```bash
-git clone --branch qwen-draft-model-changes https://github.com/Frankstuff/dflash.git
-cd dflash
+git clone --branch qwen-draft-model-changes https://github.com/Frankstuff/Speculative-decoding-project.git
+cd Speculative-decoding-project
 python3.12 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e '.[local]' pytest
@@ -147,4 +147,4 @@ A negative result does not rule out the trained-refiner proposal. The frozen che
 
 Next steps are to train the adapter and two-layer refiner on draft-generated inputs and target labels, compare it against this baseline and a capacity-matched refiner without saved draft states, then implement packed tree verification with branch-mask and cache-selection tests. Target-only greedy decoding and ordinary DFlash remain the correctness and efficiency references.
 
-The method builds on [DFlash](https://github.com/z-lab/dflash). Related work in the original proposal includes [xPress](https://arxiv.org/abs/2608.02438) and [D²SD](https://arxiv.org/abs/2606.04446); conditional refinement and draft-representation reuse should not be presented as new solely because this fork implements a particular variant. See the preserved [upstream documentation](docs/UPSTREAM_README.md) for original authorship, installation context, and citations.
+The method builds on [DFlash](https://github.com/z-lab/dflash). Related work in the original proposal includes [xPress](https://arxiv.org/abs/2608.02438) and [D²SD](https://arxiv.org/abs/2606.04446); conditional refinement and draft-representation reuse should not be presented as new solely because this project implements a particular variant. See the preserved [upstream documentation](docs/UPSTREAM_README.md) for original authorship, installation context, and citations.
